@@ -209,7 +209,7 @@ class ViewController: UIViewController {
                 self.displayImageFromFlickrBySearch(methodParametersWithPageNumber, randomPage)
                 return
             }
-            print(flickrURLFromParameters(methodParameters))
+            //print(flickrURLFromParameters(methodParameters))
             let randomIndex = Int(arc4random_uniform(UInt32(photoArray.count)))
             let randomPhoto = photoArray[randomIndex] as [String:AnyObject]
             let photoTitle = randomPhoto[Constants.FlickrResponseKeys.Title] as? String
