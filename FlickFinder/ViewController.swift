@@ -61,7 +61,7 @@ class ViewController: UIViewController {
     // MARK: Search Actions
     
     @IBAction func searchByPhrase(_ sender: AnyObject) {
-        if checkReachability(){
+        if checkReachability(){ // Check Internet Connection
             let withPageNumber: Int? = nil
             userDidTapView(self)
             setUIEnabled(false)
