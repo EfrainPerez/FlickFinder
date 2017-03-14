@@ -38,6 +38,21 @@ class ViewController: UIViewController {
         subscribeToNotification(.UIKeyboardDidHide, selector: #selector(keyboardDidHide))
     }
     
+    private func checkReachability() ->Bool{
+        var connectedToInternet : Bool = true
+        
+        if currentReachabilityStatus == .notReachable {
+            connectedToInternet = false
+            let alert = UIAlertController(title: "Alert", message: "Please Connect to Internet", preferredStyle: UIAlertControllerStyle.alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: UIAlertActionStyle.default, handler: {
+                (action) in alert.dismiss(animated: true, completion: nil)
+            }))
+            self.present(alert,animated:true,completion: nil)
+        }
+        print("si hay")
+        return connectedToInternet
+    }
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         unsubscribeFromAllNotifications()
@@ -46,53 +61,58 @@ class ViewController: UIViewController {
     // MARK: Search Actions
     
     @IBAction func searchByPhrase(_ sender: AnyObject) {
-        let withPageNumber: Int? = nil
-        userDidTapView(self)
-        setUIEnabled(false)
-        
-        if !phraseTextField.text!.isEmpty {
-            photoTitleLabel.text = "Searching..."
-            // TODO: Set necessary parameters!
-            let methodParameters: [String: AnyObject] =
-                [Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch as AnyObject,
-                 Constants.FlickrParameterKeys.Text : phraseTextField.text! as AnyObject,
-                 Constants.FlickrParameterKeys.Extras : Constants.FlickrParameterValues.MediumURL as AnyObject,
-                 Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
-                 Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
-                 Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat as AnyObject,
-                 Constants.FlickrParameterKeys.NoJSONCallback : Constants.FlickrParameterValues.DisableJSONCallback as AnyObject
-                 ]
-            displayImageFromFlickrBySearch(methodParameters,withPageNumber)
-        } else {
-            setUIEnabled(true)
-            photoTitleLabel.text = "Phrase Empty."
+        if checkReachability(){
+            let withPageNumber: Int? = nil
+            userDidTapView(self)
+            setUIEnabled(false)
+            if !phraseTextField.text!.isEmpty {
+                photoTitleLabel.text = "Searching..."
+                // TODO: Set necessary parameters!
+                let methodParameters: [String: AnyObject] =
+                    [Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch as AnyObject,
+                     Constants.FlickrParameterKeys.Text : phraseTextField.text! as AnyObject,
+                     Constants.FlickrParameterKeys.Extras : Constants.FlickrParameterValues.MediumURL as AnyObject,
+                     Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
+                     Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
+                     Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat as AnyObject,
+                     Constants.FlickrParameterKeys.NoJSONCallback : Constants.FlickrParameterValues.DisableJSONCallback as AnyObject
+                ]
+                displayImageFromFlickrBySearch(methodParameters,withPageNumber)
+            } else {
+                setUIEnabled(true)
+                photoTitleLabel.text = "Phrase Empty."
+            }
         }
+        
     }
     
     @IBAction func searchByLatLon(_ sender: AnyObject) {
-        let withPageNumber: Int? = nil
-        userDidTapView(self)
-        setUIEnabled(false)
+        if checkReachability(){
+            let withPageNumber: Int? = nil
+            userDidTapView(self)
+            setUIEnabled(false)
+            if isTextFieldValid(latitudeTextField, forRange: Constants.Flickr.SearchLatRange) && isTextFieldValid(longitudeTextField, forRange: Constants.Flickr.SearchLonRange) {
+                photoTitleLabel.text = "Searching..."
+                // TODO: Set necessary parameters!
+                
+                let methodParameters: [String: AnyObject] =
+                    [Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch as AnyObject,
+                     Constants.FlickrParameterKeys.BoundingBox: bboxString() as AnyObject,
+                     Constants.FlickrParameterKeys.Extras : Constants.FlickrParameterValues.MediumURL as AnyObject,
+                     Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
+                     Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
+                     Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat as AnyObject,
+                     Constants.FlickrParameterKeys.NoJSONCallback : Constants.FlickrParameterValues.DisableJSONCallback as AnyObject
+                ]
+                displayImageFromFlickrBySearch(methodParameters, withPageNumber)
+            }
+            else {
+                setUIEnabled(true)
+                photoTitleLabel.text = "Lat should be [-90, 90].\nLon should be [-180, 180]."
+            }
+        }
         
-        if isTextFieldValid(latitudeTextField, forRange: Constants.Flickr.SearchLatRange) && isTextFieldValid(longitudeTextField, forRange: Constants.Flickr.SearchLonRange) {
-            photoTitleLabel.text = "Searching..."
-            // TODO: Set necessary parameters!
-            
-            let methodParameters: [String: AnyObject] =
-                [Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch as AnyObject,
-                 Constants.FlickrParameterKeys.BoundingBox: bboxString() as AnyObject,
-                 Constants.FlickrParameterKeys.Extras : Constants.FlickrParameterValues.MediumURL as AnyObject,
-                 Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey as AnyObject,
-                 Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod as AnyObject,
-                 Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat as AnyObject,
-                 Constants.FlickrParameterKeys.NoJSONCallback : Constants.FlickrParameterValues.DisableJSONCallback as AnyObject
-            ]
-            displayImageFromFlickrBySearch(methodParameters, withPageNumber)
-        }
-        else {
-            setUIEnabled(true)
-            photoTitleLabel.text = "Lat should be [-90, 90].\nLon should be [-180, 180]."
-        }
+        
     }
     
     private func bboxString() -> String{
