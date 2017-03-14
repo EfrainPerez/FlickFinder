@@ -49,7 +49,7 @@ class ViewController: UIViewController {
             }))
             self.present(alert,animated:true,completion: nil)
         }
-        print("si hay")
+        //print("si hay")
         return connectedToInternet
     }
     
